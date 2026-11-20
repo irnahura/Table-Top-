@@ -1,0 +1,23 @@
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Runtime accounts, sessions, and saved campaigns
+/data/
+
+# Generated binaries, logs, and browser test artifacts
+*.exe
+*.log
+/output/
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local JavaScript dependencies
+node_modules/

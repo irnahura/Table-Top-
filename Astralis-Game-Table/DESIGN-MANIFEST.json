@@ -1,44 +1,85 @@
 {
   "schema": "open-design.design-manifest.v1",
   "title": "94f24064-d29c-4ca8-b50b-cea06d2adb9c",
-  "entryFile": "astralis-campaign-select.html",
+  "entryFile": "astralis-home-v2.html",
   "sourceFiles": {
     "all": [
+      "2026-10-03-19-39-28.mp4",
+      "assets/alchemy-covers/call-of-cthulhu.webp",
+      "assets/alchemy-covers/candela-obscura.webp",
+      "assets/alchemy-covers/dungeons-and-dragons.webp",
+      "assets/alchemy-covers/SOURCES.md",
+      "assets/alchemy-covers/vaesen.webp",
+      "assets/alchemy-covers/vampire-the-masquerade.webp",
+      "assets/alchemy-covers/wilderfeast.webp",
       "Astralis_Open_Design_Spec_v2.md",
       "astralis-campaign-select-check.png",
-      "astralis-campaign-select.html",
       "astralis-detroit-reference-09s.jpg",
+      "astralis-home-check.png",
+      "astralis-home-liquid-check.png",
+      "astralis-home-motion-check.png",
+      "astralis-home-v2.html",
+      "astralis-home.html",
       "astralis-onboarding-check.png",
       "astralis-onboarding-v2-check.png",
       "astralis-onboarding-v2.html",
-      "astralis-onboarding.html",
+      "astralis-onboarding-v3.html",
       "astralis-tabletop-check.png",
+      "astralis-tabletop-v2.html",
       "astralis-tabletop.html",
       "brand-spec.md",
+      "openai.svg",
+      "Screen-Recording-2026-10-04-175912.mp4",
+      "screenshot-2026-10-04T12-30-29-337Z.png",
+      "screenshot-2026-10-04T12-51-09-672Z.png",
+      "screenshot-2026-10-04T13-07-36-953Z.png",
       "vidssave.com-Detroit_-Become-Human---All-Main-Menu-Dialogues-HD-_-Android-ST200_-Chloe-720P.mp4"
     ],
     "html": [
-      "astralis-campaign-select.html",
+      "astralis-home-v2.html",
+      "astralis-home.html",
       "astralis-onboarding-v2.html",
-      "astralis-onboarding.html",
+      "astralis-onboarding-v3.html",
+      "astralis-tabletop-v2.html",
       "astralis-tabletop.html"
     ],
     "css": [],
     "scriptsAndComponents": [],
     "assets": [
+      "2026-10-03-19-39-28.mp4",
+      "assets/alchemy-covers/call-of-cthulhu.webp",
+      "assets/alchemy-covers/candela-obscura.webp",
+      "assets/alchemy-covers/dungeons-and-dragons.webp",
+      "assets/alchemy-covers/SOURCES.md",
+      "assets/alchemy-covers/vaesen.webp",
+      "assets/alchemy-covers/vampire-the-masquerade.webp",
+      "assets/alchemy-covers/wilderfeast.webp",
       "Astralis_Open_Design_Spec_v2.md",
       "astralis-campaign-select-check.png",
       "astralis-detroit-reference-09s.jpg",
+      "astralis-home-check.png",
+      "astralis-home-liquid-check.png",
+      "astralis-home-motion-check.png",
       "astralis-onboarding-check.png",
       "astralis-onboarding-v2-check.png",
       "astralis-tabletop-check.png",
       "brand-spec.md",
+      "openai.svg",
+      "Screen-Recording-2026-10-04-175912.mp4",
+      "screenshot-2026-10-04T12-30-29-337Z.png",
+      "screenshot-2026-10-04T12-51-09-672Z.png",
+      "screenshot-2026-10-04T13-07-36-953Z.png",
       "vidssave.com-Detroit_-Become-Human---All-Main-Menu-Dialogues-HD-_-Android-ST200_-Chloe-720P.mp4"
     ]
   },
   "screens": [
     {
-      "file": "astralis-campaign-select.html",
+      "file": "astralis-home-v2.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "astralis-home.html",
       "role": "screen",
       "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
     },
@@ -48,7 +89,12 @@
       "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
     },
     {
-      "file": "astralis-onboarding.html",
+      "file": "astralis-onboarding-v3.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "astralis-tabletop-v2.html",
       "role": "screen",
       "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
     },
@@ -89,7 +135,7 @@
   },
   "tokens": {
     "source": [
-      "astralis-campaign-select.html"
+      "astralis-home-v2.html"
     ],
     "required": [
       "background",
@@ -108,7 +154,7 @@
   },
   "interactions": {
     "source": [
-      "astralis-campaign-select.html"
+      "astralis-home-v2.html"
     ],
     "requiredStates": [
       "default",

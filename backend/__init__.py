@@ -1,0 +1,1 @@
+"""Astralis modular-monolith backend."""

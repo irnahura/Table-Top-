@@ -1,0 +1,5 @@
+Astralis guide portrait: supplied asset from the existing Astralis Game Table project in OpenDesign Cloud (astralis-main-menu-face.png).
+Riverside battle map: generated for the Astralis cinematic redesign.
+Map, party, and dice icons: Phosphor Icons, MIT license.
+Source: https://github.com/phosphor-icons/core
+License: https://github.com/phosphor-icons/core/blob/main/LICENSE

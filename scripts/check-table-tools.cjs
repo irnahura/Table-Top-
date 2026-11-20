@@ -1,0 +1,54 @@
+// Real backend + real browser, with temporary storage and isolated profiles.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const {spawn}=require('node:child_process');
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict');
+const folder=fs.mkdtempSync(path.join(os.tmpdir(),'astralis-tools-'));
+const base='http://127.0.0.1:18081',data=path.join(folder,'game.json');
+let server,browser,testPage;const errors=[];
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function start(){server=spawn(path.resolve('output/astralis-test.exe'),[],{cwd:process.cwd(),env:{...process.env,PORT:'18081',ASTRALIS_DATA_FILE:data},windowsHide:true,stdio:'pipe'});for(let i=0;i<100;i++){try{if((await fetch(base+'/health')).ok)return;}catch{}await wait(100);}throw Error('Test server did not start');}
+async function stop(){if(server&&!server.killed){const stopped=new Promise(resolve=>server.once('exit',resolve));server.kill();await stopped;}}
+async function overflow(page,label){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label+' overflow');}
+async function command(page,action){const response=page.waitForResponse(r=>r.url().endsWith('/commands')&&r.request().method()==='POST');await action();const r=await response;assert.equal(r.status(),200,await r.text());const result=await r.json();await page.waitForFunction(seq=>document.querySelector('#table-status')?.textContent!=='Resolving action…',result.sequence_number);return result;}
+async function cell(page,x,y){const b=await page.locator('.map-world').boundingBox();await page.mouse.click(b.x+(x+.5)/20*b.width,b.y+(y+.5)/14*b.height);}
+async function openTools(page){await page.locator('[data-inspector-tab="tools"]').click();}
+async function shot(page,name){await page.screenshot({path:'output/screenshots/'+name+'.png',animations:'disabled'});}
+(async()=>{try{
+ await start();browser=await chromium.launch({headless:true});
+ const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'}),page=await context.newPage();testPage=page;page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base+'/#/login');const demoResponse=page.waitForResponse(r=>r.url().endsWith('/auth/demo'));
+ await page.getByRole('button',{name:'Try a demo table'}).click();const demo=await (await demoResponse).json();const sid=demo.snapshot.id,cid=demo.campaign.id;
+ await page.waitForURL('**/#/table/'+cid);await page.locator('.map-world').waitFor();await page.locator('.battle-art').evaluate(img=>img.decode());
+ assert.equal(await page.locator('[data-map-tool]').count(),13);await overflow(page,'Desktop tools');
+ await page.getByRole('button',{name:'Fit map',exact:true}).click();
+ await page.getByRole('button',{name:'Ruler tool',exact:true}).click();await page.getByRole('button',{name:'Close Measure',exact:true}).click();await cell(page,1,8);await cell(page,4,10);assert.match(await page.locator('#table-status').textContent(),/5 grid spaces/);assert.equal(await page.locator('.measure-overlay').count(),1);
+ await page.getByRole('button',{name:'More tools',exact:true}).click();await page.getByRole('button',{name:'Line tool',exact:true}).click();await cell(page,1,8);let r=await command(page,()=>cell(page,4,10));assert.equal(r.snapshot.state.drawings.length,1);
+ await page.getByRole('button',{name:'More tools',exact:true}).click();await page.getByRole('button',{name:'Area tool',exact:true}).click();await cell(page,9,8);r=await command(page,()=>cell(page,12,10));assert.equal(r.snapshot.state.drawings.length,2);
+ await page.getByRole('button',{name:'More tools',exact:true}).click();await page.getByRole('button',{name:'Block tool',exact:true}).click();r=await command(page,()=>cell(page,6,8));assert(r.snapshot.state.blocked.some(p=>p.x===6&&p.y===8));
+ await page.getByRole('button',{name:'More tools',exact:true}).click();await page.getByRole('button',{name:'Fog tool',exact:true}).click();r=await command(page,()=>cell(page,3,9));assert.equal(r.snapshot.state.fog.length,1);
+ await page.getByRole('button',{name:'Ping tool',exact:true}).click();r=await command(page,()=>cell(page,10,9));assert.equal(r.event_type,'map.ping');
+ await openTools(page);await shot(page,'astralis-tools-desktop');
+ const dice=page.locator('[data-tool-form="dice"]');await dice.getByLabel('Dice',{exact:true}).fill('3');await dice.getByLabel('Sides',{exact:true}).fill('6');await dice.getByLabel('Bonus',{exact:true}).fill('2');r=await command(page,()=>dice.getByRole('button',{name:'Roll dice'}).click());assert.equal(r.payload.rolls.length,3);assert(r.payload.total>=5&&r.payload.total<=20);await page.locator('.tool-dice-result').waitFor();
+ const add=page.locator('[data-tool-form="add"]');await add.getByLabel('Token name').fill('Tavern keeper');r=await command(page,()=>add.getByRole('button',{name:'Add to scene'}).click());assert.equal(r.snapshot.state.actors.length,5);
+ let edit=page.locator('[data-tool-form="edit"]');await edit.locator('[name="token_id"]').selectOption('lira');await edit.getByLabel('Name',{exact:true}).fill('Lira the scout');await edit.getByLabel(/Hit points/).fill('42');r=await command(page,()=>edit.getByRole('button',{name:'Save token'}).click());assert.equal(r.snapshot.state.actors.find(a=>a.id==='lira').hp,42);
+ await edit.getByRole('button',{name:'Place selected token on map'}).click();r=await command(page,()=>cell(page,5,8));assert.equal(r.snapshot.state.actors.find(a=>a.id==='lira').y,8);
+ const notes=page.locator('[data-tool-form="notes"]');await notes.getByLabel('Shared notes').fill('Ask the innkeeper about the bridge.');await command(page,()=>notes.getByRole('button',{name:'Save notes'}).click());
+ const chat=page.locator('[data-tool-form="chat"]');await chat.getByLabel('Message',{exact:true}).fill('The party is ready.');await command(page,()=>chat.getByRole('button',{name:'Send message'}).click());assert.match(await page.locator('.table-chat').textContent(),/The party is ready/);
+ const scene=page.locator('[data-tool-form="scene"]');await scene.locator('[name="scene"]').selectOption('blank');await command(page,()=>scene.getByRole('button',{name:'Apply background'}).click());assert.equal(await page.locator('.blank-battle-art').count(),1);
+ const upload=page.locator('[data-tool-form="upload"]');await upload.locator('input[type=file]').setInputFiles({name:'test-map.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a0nUAAAAASUVORK5CYII=','base64')});r=await command(page,()=>upload.getByRole('button',{name:'Upload map'}).click());assert.equal(r.snapshot.state.map_image,'custom');assert.match(await page.locator('.battle-art').getAttribute('src'),/^data:image\/png/);
+ await scene.locator('[name="scene"]').selectOption('village');await command(page,()=>scene.getByRole('button',{name:'Apply background'}).click());
+ await command(page,()=>page.getByRole('button',{name:'Undo last annotation'}).click());
+ const inviteResponse=page.waitForResponse(r=>r.url().endsWith('/invitations'));await page.getByRole('button',{name:'Create invitation code'}).click();const invite=(await(await inviteResponse).json()).token;await page.getByLabel('Generated invitation code').waitFor();
+ // Create a separate real player and join the demo campaign through the UI.
+ const playerContext=await browser.newContext({viewport:{width:1100,height:850},reducedMotion:'reduce'}),player=await playerContext.newPage();player.on('pageerror',e=>errors.push(e.message));
+ await player.goto(base+'/#/register');await player.getByLabel('Display name').fill('Demo Player');await player.getByLabel('Email address').fill('player@example.test');await player.getByLabel('Password').fill('test-player-password');await player.getByRole('button',{name:'Create account'}).click();await player.waitForURL('**/#/library');
+ await player.locator('.join-campaign summary').click();await player.getByLabel('Invitation code',{exact:true}).fill(invite);await player.getByRole('button',{name:'Join campaign',exact:true}).click();await player.locator('.campaign-card').waitFor();await player.locator('.campaign-card a').first().click();await player.getByRole('button',{name:'Resume session',exact:true}).click();await player.waitForURL('**/#/table/'+cid);await openTools(player);
+ assert.equal(await player.getByRole('button',{name:'Block tool',exact:true}).count(),0);assert.equal(await player.locator('[data-tool-form="notes"]').count(),0);assert.match(await player.locator('.saved-notes').textContent(),/Ask the innkeeper/);
+ await player.locator('[data-tool-form="chat"] textarea').fill('Player joined successfully.');await command(player,()=>player.getByRole('button',{name:'Send message'}).click());await page.waitForFunction(()=>document.querySelector('.table-chat')?.textContent.includes('Player joined successfully.'),null,{timeout:12000});
+ // Saving browser auth and session discovery survive a backend restart.
+ await stop();await start();await page.reload();await page.locator('.map-world').waitFor();await openTools(page);assert.equal(await page.locator('[data-tool-form="notes"] textarea').inputValue(),'Ask the innkeeper about the bridge.');await page.locator('.game-toolbar [data-map-tool="select"]').click();
+ await page.getByRole('button',{name:'End turn',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.active-turn')?.textContent.includes('Lira the scout'));
+ await page.locator('[data-inspector-tab="characters"]').click();await page.locator('[data-actor-id="lira"]').last().click();await page.getByRole('button',{name:'End turn',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.active-turn')?.textContent.includes('Tavern keeper'));
+ await page.setViewportSize({width:390,height:844});await overflow(page,'Mobile map tools');await page.getByRole('button',{name:'Open character and encounter panel'}).click();await openTools(page);await overflow(page,'Mobile tools panel');await shot(page,'astralis-tools-mobile');await page.getByRole('button',{name:'Close character panel',exact:true}).click();await shot(page,'astralis-map-tools-mobile');
+ assert.deepEqual(errors,[]);console.log('Real tabletop checks passed: demo sign-in, ruler, line/area annotations, terrain, fog plan, ping, dice, token creation/edit/placement, map upload, scene switching, notes, chat, invitations, player permissions, shared updates, restart persistence and mobile tools.');
+ }catch(error){console.error('Browser errors:',errors);await testPage?.screenshot({path:'output/screenshots/tools-failure.png'});throw error;}finally{await browser?.close();await stop();fs.rmSync(folder,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});
