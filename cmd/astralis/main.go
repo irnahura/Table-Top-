@@ -23,6 +23,7 @@ type Point struct {
 	Y int `json:"y"`
 }
 type Actor struct {
+	SheetID         string   `json:"sheet_id,omitempty"`
 	Darkvision      int      `json:"darkvision,omitempty"`
 	Layer           string   `json:"layer,omitempty"`
 	Rotation        int      `json:"rotation,omitempty"`

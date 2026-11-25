@@ -83,7 +83,7 @@ func adventureCommand(kind string) bool {
 		return true
 	}
 	switch kind {
-	case "sheet.save", "sheet.delete", "sheet.roll", "quest.save", "quest.delete", "rolltable.save", "rolltable.delete", "rolltable.draw", "rolltable.reset":
+	case "sheet.save", "sheet.delete", "sheet.roll", "sheet.place", "sheet.link", "quest.save", "quest.delete", "rolltable.save", "rolltable.delete", "rolltable.draw", "rolltable.reset":
 		return true
 	}
 	return false
@@ -115,6 +115,61 @@ func (s *Server) adventureCommand(original World, v map[string]any, c Campaign, 
 			return fail("SHEET_NOT_FOUND")
 		}
 		switch kind {
+		case "sheet.place", "sheet.link":
+			if !gm {
+				return fail("PERMISSION_DENIED: only the GM can place or link sheet tokens")
+			}
+			sheet := w.Sheets[index]
+			if kind == "sheet.place" {
+				hostile, valid := v["hostile"].(bool)
+				layer := text(v, "layer")
+				if !valid || !contains([]string{"tokens", "gm"}, layer) {
+					return fail("INVALID_PLACEMENT: choose a party/NPC token and Tokens or GM private layer")
+				}
+				if sheet.ControllerID != "" && (!member(c, sheet.ControllerID) || s.db.Users[sheet.ControllerID].ID == "") {
+					return fail("INVALID_ASSIGNMENT: sheet controller must still belong to this campaign")
+				}
+				next, _, _, _, err := toolRule(w, map[string]any{"type": "token.add", "name": text(v, "name"), "hp": v["hp"], "x": v["x"], "y": v["y"], "hostile": hostile}, true, s.db.Users[user].DisplayName)
+				if err != nil {
+					return fail(err.Error())
+				}
+				w = next
+				a := &w.Actors[len(w.Actors)-1]
+				a.SheetID, a.Layer = sheet.ID, layer
+				if layer == "gm" && w.ActiveActorID == a.ID {
+					w.ActiveActorID = original.ActiveActorID
+				}
+				if !hostile {
+					a.ControllerID = sheet.ControllerID
+					if a.ControllerID != "" {
+						a.ControllerName = s.db.Users[a.ControllerID].DisplayName
+					}
+				}
+				data["token_id"] = a.ID
+				data["message"] = "Placed a linked token."
+			} else {
+				_, a := actor(w, text(v, "token_id"))
+				unlink, valid := v["unlink"].(bool)
+				if a == nil || !valid {
+					return fail("INVALID_LINK: choose an existing token and a link action")
+				}
+				if unlink {
+					if a.SheetID != sheet.ID {
+						return fail("INVALID_LINK: token is not linked to this sheet")
+					}
+					a.SheetID = ""
+					data["message"] = "Token unlinked from sheet."
+				} else {
+					a.SheetID = sheet.ID
+					data["message"] = "Sheet linked to token."
+				}
+				data["token_id"] = a.ID
+			}
+			// Links are navigation references. Existing stats and control stay intact.
+			// New party tokens inherit control once; later sheet edits do not reassign them.
+			data["sheet_id"] = sheet.ID
+			// Link/placement receipts can reference a hidden token. Keep their history GM-only.
+			return w, kind, user, data, nil, true, nil
 		case "sheet.entry.save", "sheet.entry.use", "sheet.entry.delete":
 			sheet := &w.Sheets[index]
 			entryIndex := -1
@@ -165,6 +220,7 @@ func (s *Server) adventureCommand(original World, v map[string]any, c Campaign, 
 				return fail("PERMISSION_DENIED: only the GM can delete sheets")
 			}
 			w.Sheets = append(w.Sheets[:index], w.Sheets[index+1:]...)
+			unlinkSheet(&w, text(v, "sheet_id"))
 		case "sheet.roll":
 			roll, err := diceFormula(text(v, "formula"))
 			if err != nil {
@@ -344,4 +400,18 @@ func (s *Server) adventureCommand(original World, v map[string]any, c Campaign, 
 		}
 	}
 	return w, kind, user, data, audience, private, nil
+}
+
+// Global sheets can be referenced by tokens in both active and archived scenes.
+func unlinkSheet(w *World, sheetID string) {
+	for i := range w.Actors {
+		if w.Actors[i].SheetID == sheetID {
+			w.Actors[i].SheetID = ""
+		}
+	}
+	for i := range w.Pages {
+		if w.Pages[i].State != nil {
+			unlinkSheet(w.Pages[i].State, sheetID)
+		}
+	}
 }

@@ -93,9 +93,16 @@ func (s *Server) sessionView(ss Session, user string) Session {
 	}
 	if !gm {
 		visible := sightCells(ss.State, user)
+		visibleSheets := map[string]bool{}
+		for _, sheet := range w.Sheets {
+			visibleSheets[sheet.ID] = true
+		}
 		w.Actors = []Actor{}
 		for _, a := range ss.State.Actors {
 			if !hiddenLayer(a.Layer) && (!w.SightEnabled || visible[Point{a.X, a.Y}]) {
+				if !visibleSheets[a.SheetID] {
+					a.SheetID = ""
+				}
 				w.Actors = append(w.Actors, a)
 			}
 		}

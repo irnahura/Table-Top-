@@ -11,6 +11,9 @@ import (
 // from user/role/controller fields submitted in a gameplay payload.
 func authorizeActor(world World, payload map[string]any, campaign Campaign, user string) error {
 	kind := text(payload, "type")
+	if (kind == "sheet.place" || kind == "sheet.link") && campaign.OwnerID != user {
+		return errors.New("PERMISSION_DENIED: only the game master can place or link sheet tokens")
+	}
 	if strings.HasPrefix(kind, "sheet.") && campaign.OwnerID != user {
 		for _, sheet := range world.Sheets {
 			if sheet.ID == text(payload, "sheet_id") && sheet.ControllerID == user && kind != "sheet.delete" {

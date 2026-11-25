@@ -1,8 +1,22 @@
 # Astralis Game Table
 
+Deployment destination and current prerequisites: [ASTRALIS_DEPLOYMENT.md](ASTRALIS_DEPLOYMENT.md). The requested Vercel account is `irnahuras-projects`; publishing the complete app requires access to that account and durable hosting for the Go backend.
+
+## Help and tool guides — 25 November 2026
+
+Open `/#/help` for **32 searchable guides** covering campaigns and every current tabletop tool, with player/GM filters and shareable guide URLs (`/#/help/sheets`, for example). Learn, the campaign sidebar, the footer and the existing getting-started/glossary pages link to the handbook.
+
+**Build an adventure** at `/#/help/adventure` connects eleven preparation lessons, local course progress, current-table content counts and seven original worksheets. Copy/download resources or prepare a private Journal draft and save it after review. Existing drafts are preserved. Table → Sheets now provides **Map tokens**: link an existing token, unlink it, or place a new token from a sheet. Open a visible linked sheet from the token menu. New party tokens inherit the sheet controller once; existing stats/control remain independent and sheet reassignment does not reassign placed tokens. See the [Roll20 workflow audit](ASTRALIS_ROLL20_ADVENTURE_AUDIT_2026-11-25.md) for verified coverage and gaps. `node scripts/check-adventure-course.cjs` verifies the course and linked-token flow on disposable port 18090.
+
+Inside a table, choose **Help & tools** or press **?**. **Ctrl/Command + K** opens the tool finder. Guides can open authorized tools directly, including hidden secondary tools and collapsed/mobile workspace panels. **How to use this** explains the current inspector section. A six-step table tour introduces the workspace without issuing game commands. GM/player preparation checklists are manually checked and saved locally per account and campaign. Help stays open while the table receives updates; Escape closes it and focus returns to the table.
+
+The FAQ and glossary now describe the implemented sheets, lighting, journals and game profiles accurately. Existing gameplay and permissions are preserved. `frontend/learning.js` is the shared content/UI source; `learning.css` contains scoped styles. Run `node scripts/check-learning.cjs` after building `output/astralis-test.exe`, with the existing Playwright setup. The journey uses disposable storage on port **18089** and verifies guides, launch targets, role restrictions, checklist persistence, keyboard/focus behavior, desktop/390px layouts and unchanged encounter state.
+
+See [the 25 November checkpoint](ASTRALIS_PROGRESS_2026-11-25.md) for scope, reference-access limitations and validation.
+
 For complete continuation context, implementation details, validation results and known limitations, read [ASTRALIS_HANDOFF.md](ASTRALIS_HANDOFF.md).
 
-Latest consolidated checkpoint: [ASTRALIS_PROGRESS_2026-11-15.md](ASTRALIS_PROGRESS_2026-11-15.md), including completed features, tests, runtime evidence and the continuation checklist.
+Latest checkpoint: [ASTRALIS_PROGRESS_2026-11-25.md](ASTRALIS_PROGRESS_2026-11-25.md). The [15 November inventory](ASTRALIS_PROGRESS_2026-11-15.md) retains the consolidated game features and deeper implementation backlog.
 
 ## Game profiles and reference tools — 15 November 2026
 

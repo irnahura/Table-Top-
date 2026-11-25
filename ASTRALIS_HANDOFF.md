@@ -1,6 +1,8 @@
 # Astralis project handoff
 
-Updated: 14 November 2026. Read the final continuation section for the newest implementation and validation. Read this file and `README.md` before changing the project. Earlier design/progress documents are historical references and may describe superseded implementations.
+Latest continuation: [25 November 2026 guide and usability checkpoint](ASTRALIS_PROGRESS_2026-11-25.md) and [Roll20 adventure-workflow audit](ASTRALIS_ROLL20_ADVENTURE_AUDIT_2026-11-25.md). The public handbook, contextual help, adventure course, original preparation templates and session sheet/token links extend the feature inventory below. Read those documents for the latest changes and validation; game-rule and infrastructure limits below still apply.
+
+Updated: 25 November 2026. Read the linked 25 November checkpoint for the newest guide/usability work; the final continuation below describes the preceding game-tool implementation. Read this file and `README.md` before changing the project. Earlier design/progress documents are historical references and may describe superseded implementations.
 
 ## Project and delivery state
 

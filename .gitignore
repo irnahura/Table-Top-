@@ -11,6 +11,9 @@
 *.exe
 *.log
 /output/
+/.playwright-mcp/
+/.vercel/
+/dist/
 
 # Python caches and virtual environments
 __pycache__/
