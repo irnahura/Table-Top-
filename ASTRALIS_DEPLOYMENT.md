@@ -25,4 +25,18 @@ References: [Vercel runtime filesystem](https://vercel.com/docs/functions/runtim
 
 This deployment is a **public website/interactive preview and guides**, not the persistent game backend. The generated `deployment-config.js` enables an explicit online-play availability page for sign-in/campaign/table routes. Running the Go app locally keeps full existing functionality because that generated configuration is only injected into the Vercel build. Do not remove the availability guard until a persistent backend is configured and tested.
 
-The first application commit is `b319aa9` (`feat: add adventure course and linked character sheets`). Vercel publication configuration is committed separately. Production deployment URL/status will be verified after upload.
+The application commit is `b319aa9` (`feat: add adventure course and linked character sheets`). The tested Vercel publication configuration is committed as `fcd9b08` (`build: configure Vercel website deployment`). These are local commits; no Git push was performed for this request. The Vercel CLI uploaded the committed source directly.
+
+## Verified production deployment
+
+- Public URL: **https://astralis-tabletop.vercel.app**.
+- Project: https://vercel.com/irnahuras-projects/astralis-tabletop .
+- Deployment: `dpl_2kWwdCdwaHMjsxDek5DCFp6VxnwE`.
+- Immutable URL: https://astralis-tabletop-mm58f5d72-irnahuras-projects.vercel.app .
+- Vercel reported **READY**, target **production**, and assigned the public alias above.
+- Root page returned HTTP 200. The published adventure guide exactly matched current source. The included SRD PDF returned HTTP 200. `/data/astralis.json` returned HTTP 404.
+- `/deployment.json` reports `mode: public-preview` and `persistent_backend_connected: false`.
+- Live Playwright MCP verification passed: desktop preview, eleven course lessons, mobile chapter navigation at 390px, explicit online-play notice, no authentication forms on unavailable sign-up routes, no horizontal overflow and no browser page errors.
+- Screenshot: `output/screenshots/astralis-vercel-live-mobile.png`.
+
+This verifies publication of the website/preview/guides only. The Go backend and local saved accounts/campaigns were not deployed or uploaded. A persistent backend host or a durable serverless storage migration is still required for online play. Local Go functionality remains available at localhost:8080.
