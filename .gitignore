@@ -24,3 +24,5 @@ venv/
 
 # Local JavaScript dependencies
 node_modules/
+
+.vercel

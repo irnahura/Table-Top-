@@ -1,0 +1,16 @@
+.git
+.vercel
+.playwright-mcp
+.env
+.env.*
+data
+output
+dist
+node_modules
+backend
+requirements.txt
+cmd
+Astralis-Game-Table
+__pycache__
+*.exe
+*.log
