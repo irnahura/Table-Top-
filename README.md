@@ -1,180 +1,160 @@
-# Astralis Game Table
+# Astralis
 
-Deployment destination and current prerequisites: [ASTRALIS_DEPLOYMENT.md](ASTRALIS_DEPLOYMENT.md). The requested Vercel account is `irnahuras-projects`; publishing the complete app requires access to that account and durable hosting for the Go backend.
+Astralis is a browser-based virtual tabletop for RPG campaigns. A Go HTTP/WebSocket server validates gameplay and saves accounts, campaigns and sessions. The frontend uses plain HTML, CSS and JavaScript. The legacy Python backend is optional historical code, not the current game's authoritative runtime.
 
-## Help and tool guides — 25 November 2026
+This README is the project's **single tracked Markdown reference**. Older plans, handoffs, audits and progress notes remain locally but are no longer published in the current GitHub tree. Historical commits are not rewritten.
 
-Open `/#/help` for **32 searchable guides** covering campaigns and every current tabletop tool, with player/GM filters and shareable guide URLs (`/#/help/sheets`, for example). Learn, the campaign sidebar, the footer and the existing getting-started/glossary pages link to the handbook.
+## Current hosting
 
-**Build an adventure** at `/#/help/adventure` connects eleven preparation lessons, local course progress, current-table content counts and seven original worksheets. Copy/download resources or prepare a private Journal draft and save it after review. Existing drafts are preserved. Table → Sheets now provides **Map tokens**: link an existing token, unlink it, or place a new token from a sheet. Open a visible linked sheet from the token menu. New party tokens inherit the sheet controller once; existing stats/control remain independent and sheet reassignment does not reassign placed tokens. See the [Roll20 workflow audit](ASTRALIS_ROLL20_ADVENTURE_AUDIT_2026-11-25.md) for verified coverage and gaps. `node scripts/check-adventure-course.cjs` verifies the course and linked-token flow on disposable port 18090.
+- Website: **https://astralis-tabletop.vercel.app**.
+- Vercel project: **irnahuras-projects/astralis-tabletop**.
+- The public site includes the landing page, interactive preview, handbook and course. **The persistent Go backend is not hosted yet; online sign-in and saved campaigns remain unavailable there.**
+- Local full application: **http://localhost:8080/** when the Go server is running.
+- Repository: https://github.com/irnahura/Table-Top- .
 
-Inside a table, choose **Help & tools** or press **?**. **Ctrl/Command + K** opens the tool finder. Guides can open authorized tools directly, including hidden secondary tools and collapsed/mobile workspace panels. **How to use this** explains the current inspector section. A six-step table tour introduces the workspace without issuing game commands. GM/player preparation checklists are manually checked and saved locally per account and campaign. Help stays open while the table receives updates; Escape closes it and focus returns to the table.
-
-The FAQ and glossary now describe the implemented sheets, lighting, journals and game profiles accurately. Existing gameplay and permissions are preserved. `frontend/learning.js` is the shared content/UI source; `learning.css` contains scoped styles. Run `node scripts/check-learning.cjs` after building `output/astralis-test.exe`, with the existing Playwright setup. The journey uses disposable storage on port **18089** and verifies guides, launch targets, role restrictions, checklist persistence, keyboard/focus behavior, desktop/390px layouts and unchanged encounter state.
-
-See [the 25 November checkpoint](ASTRALIS_PROGRESS_2026-11-25.md) for scope, reference-access limitations and validation.
-
-For complete continuation context, implementation details, validation results and known limitations, read [ASTRALIS_HANDOFF.md](ASTRALIS_HANDOFF.md).
-
-Latest checkpoint: [ASTRALIS_PROGRESS_2026-11-25.md](ASTRALIS_PROGRESS_2026-11-25.md). The [15 November inventory](ASTRALIS_PROGRESS_2026-11-15.md) retains the consolidated game features and deeper implementation backlog.
-
-## Game profiles and reference tools — 15 November 2026
-
-The tabletop header now has **Game to play** and **Rules**. The GM selects a saved, live-shared profile: Astralis Basic, D&D 5e (2014 or 2024), Warhammer 40,000, Pathfinder 2e, Fate Core or a generic percentile game. Selection preserves the encounter and existing map scale. Rules provides tailored server-resolved checks, manual sheet templates, optional scene-scale presets and a searchable rulebook directory. Profiles do not replace the basic encounter combat/movement engine.
-
-- D&D: normal/advantage/disadvantage ability checks with modifier and difficulty. Pathfinder: four degrees of success including natural 1/20 degree adjustment. Warhammer: 1–100 d6 and a 2+–6+ success threshold. Fate: 4dF plus modifier. Percentile: 1d100 at or below a target. Game-specific exceptions and subsequent effects remain manual.
-- The existing dice tray now offers **All players**, **You and GM**, and **Only you**. Private rolls are filtered through the existing event projection, including against the GM for another account's self-only roll.
-- **Ruler** opens line, square, circle, cone and beam options, center snapping/free coordinates, sharing on release, explicit sharing and clearing. Drag or click two points. Circle labels report radius; cone labels report depth. Measurements use the scene metric and scale; they do not spend movement. Beam width is one cell; templates may extend beyond the map.
-- **FX** opens burst, aimed breath, aimed beam and nova in eleven element colors. Effects are temporary visual particles, synchronized through saved events, with reduced-motion support; they do not inflict damage. With token sight enabled, GM FX stays GM-only and a player's shared measurement is limited to that player and the GM, with visible endpoints required.
-- **Light** opens the existing server-enforced token sight/darkness settings and links to lights, doors and darkvision. Light colors remain source markers; illumination is binary and explored-map memory is not implemented.
-
-Unchanged D&D [SRD 5.1](frontend/rules/dnd-srd-5.1.pdf) and [SRD 5.2.1](frontend/rules/dnd-srd-5.2.1.pdf) are bundled under CC BY 4.0, with [attribution](frontend/rules/ATTRIBUTION.txt) and [download sources/checksums](frontend/rules/manifest.json). Other rulebooks link to publisher or publisher-endorsed resources, including Warhammer downloads, Archives of Nethys and Fate SRD. Commercial rulebooks, codexes and complete paid compendiums are not bundled. Warhammer is an edition-neutral pool helper; check the edition/revision of documents on the publisher's downloads page.
-
-New backend: `cmd/astralis/systems.go` and `systems_test.go`. New UI: `frontend/systems.js` / `systems.css`. `node scripts/check-systems.cjs` runs the new real-backend GM/player journey on port 18088 with disposable data. The downloader `node scripts/fetch-open-rules.cjs` verifies existing PDFs and writes the manifest; `--refresh` downloads again and requires network access. Browser tests accept the existing `PLAYWRIGHT_MODULE` override.
-
-The main runtime is now Go. Python remains optional for future LLM connectivity and is not required to run the game.
+The Vercel build intentionally shows an availability notice instead of submitting account/campaign requests to a nonexistent backend. Local Go operation retains the full current feature set.
 
 ## Run locally
+
+Requires Go 1.26 or a Go installation with automatic toolchain download enabled. Run from the project root:
 
 ```powershell
 go run ./cmd/astralis
 ```
 
-Open <http://localhost:8080/>. Health is available at `/health`.
+Open http://localhost:8080/ . `/health` returns `astralis-go / ok`. `PORT` defaults to `8080`; `ASTRALIS_DATA_FILE` defaults to `data/astralis.json`. The server listens on all interfaces at its configured port and serves the frontend itself.
 
-The Go service serves the functional frontend in `frontend/` and the latest v2 design archive under `/design/`. It persists local state in `data/astralis.json` and exposes registration/sign-in, campaigns, invitations, characters, maps, sessions, snapshots, event replay, and authoritative commands for movement, interaction, combat, and turns.
+For practice, open Sign in → **Try a demo table**. Each entry creates a separate saved GM sandbox. Keep the browser signed in to return; demo accounts have no password recovery. For continuing play, register an account. Players register separately and redeem the GM's invitation code from My campaigns.
 
-The authoritative path is:
+## Deploy the Go backend on Render
 
-```text
-frontend → Go HTTP API → server-side game rules → persisted snapshot + event
+The current architecture needs **one Go web service and a persistent disk**. Render supports Go services and WebSockets, and its disks preserve files across restarts/deploys. Persistent disks require a paid service. Review current charges before creating resources; this repository setup has not created a paid service.
+
+`render.yaml` is a ready-to-review Blueprint: Go runtime, one `0.5c-512mb` instance, 1 GB disk at `/var/data`, `/health`, and the settings below. It provisions nothing until applied in Render.
+
+1. Sign in to https://dashboard.render.com/ and connect this GitHub repository. Create a Blueprint from `render.yaml`, or manually create a Web Service.
+2. Select branch `main`, repository root as the working directory, and language/runtime **Go**.
+3. Configure:
+
+   | Setting | Value |
+   | --- | --- |
+   | Build command | `go build -tags netgo -ldflags '-s -w' -o astralis-server ./cmd/astralis` |
+   | Start command | `./astralis-server` |
+   | Health check | `/health` |
+   | `GOTOOLCHAIN` | `auto` |
+   | Disk mount path | `/var/data` |
+   | `ASTRALIS_DATA_FILE` | `/var/data/astralis.json` |
+   | Instances | `1` |
+
+4. Let Render supply `PORT`. Choose a paid service with its persistent disk attached and confirm costs before creating it.
+5. Deploy and verify `https://<service>.onrender.com/health`. Open the root URL: **the Go service already serves the full frontend**, so accounts, campaigns and WebSockets can operate on that same Render origin without cross-origin integration.
+6. Test with disposable accounts: create a campaign, invite another account, assign a token, exchange live messages, restart the service and verify persistence. Begin production with an empty database; do not upload personal local accounts as seed data.
+7. After the backend is healthy, connect the Vercel experience. That integration is **not configured yet**. Initially, gameplay can use the Render URL. To run the table under the Vercel origin, implement/test an explicit API origin or proxy and exact allowed WebSocket/CORS origins before removing the availability guard. Setting an environment variable alone in the current build does not connect it.
+
+The JSON store and in-process live hub require one instance. Do not scale it horizontally with independent files or multiple writers. Back up `/var/data/astralis.json`. PostgreSQL/object storage and transactional save-error handling remain future work. Disk-backed rollouts can briefly interrupt service.
+
+Official references: [Go deployment](https://render.com/docs/deploy-go-gin), [persistent disks](https://render.com/docs/disks), [WebSockets](https://render.com/docs/websocket), [Blueprint specification](https://render.com/docs/blueprint-spec).
+
+## Vercel website publication
+
+`vercel.json` uses the **Other** framework preset, skips dependency installation, runs `node scripts/build-vercel.cjs` and publishes only `dist/`. The build injects preview-only `deployment-config.js`; `deployment.json` reports that the persistent backend is not connected.
+
+```powershell
+node scripts/build-vercel.cjs
+vercel --prod --yes --scope irnahuras-projects
 ```
 
-The server validates player movement, dice, damage, permissions and turns. Game masters can explicitly place tokens and edit HP through separately authorized tools.
+Use an account with access to `irnahuras-projects`. `.vercelignore` excludes local data, environment files, generated output, legacy backend files and the design archive. Local saved users/tokens must never be bundled or published.
 
-The redesigned frontend includes a public landing page, account registration and sign in, campaign creation, saved session resume, and a tactical table with server positions, blocked cells, actor selection, movement, attacks, and turns. The illustrated village on the public page is labeled as a preview. Authentication lasts seven days and survives server restarts. The campaign library discovers saved sessions from the server after sign-in.
+The verified production release returned HTTP 200 for the site/open rules PDF, matched the source guide asset, and returned HTTP 404 for `/data/astralis.json`. Live browser checks covered the course, mobile layout and availability notice. Application/configuration commits: `b319aa9`, `fcd9b08`; publication record: `e7ecfa5`. The remote branch history remains available for older implementation checkpoints.
 
-Validation commands:
+## Guides and preparation
+
+- `/#/help`: 32 searchable guide entries, player/GM filters and direct topic links.
+- `/#/help/adventure`: eleven lessons, a desktop chapter list, mobile picker and local progress.
+- `/#/help/adventure/resources`: seven original templates for outlines, locations, combat, challenges, rewards, briefings and session-zero agreements. Copy/download or stage a private Journal draft in a GM table and explicitly save after review. Existing drafts are preserved.
+- `/#/getting-started` and `/#/guide`: first-session introduction and RPG glossary.
+
+At a working table, **Help & tools**, **?**, **Ctrl/Command + K**, contextual help and **Open this tool** locate controls. The six-step tour changes local panels without issuing saved commands. Course/checklist completion is manually marked local browser state, not automatic campaign readiness.
+
+## Features and boundaries
+
+| Area | Implemented | Boundary |
+| --- | --- | --- |
+| Accounts/campaigns | Registration, sign-in/out, separate demos, library, launch/resume and expiring/limited/revocable invitations. | No recovery, email verification, public matchmaking or membership removal. |
+| Multiplayer | Authenticated WebSockets, presence, replay/reconnect, deduplicated commands, version conflicts and polling fallback. | One Go process. |
+| Control/combat | GM assignment, server-checked player actions, terrain/path/occupancy and movement budgets, basic attacks/damage, party turns and rounds. | Astralis basic rules; hostile NPCs stay GM-controlled; no hostile AI or full published-system combat. |
+| Maps/scenes | Image import, backgrounds, duplicate scenes, whole-table switching, grid scale/metric, crop and quarter-turn rotation. | No interactive image/grid alignment, hex grids or independent GM/player scenes. |
+| Editor | Pan/zoom/fit/grid, grouped tools, freehand/shapes/text/pins, layers, gesture previews, dragging and movement animation. | No drawing selection/resizing or ruler waypoints. |
+| Tokens/initiative | HP, markers, rotation, size, locks, artwork, duplication/deletion, party initiative and tracker sorting/reordering. | No custom/NPC initiative entries; markers do not apply rule effects. |
+| Sheets/resources | Assigned private/shared sheets, inventory/spells/resources, tracked quantities and validated preparation/use. | Manual notes and effects; no automatic combat-stat conversion. |
+| Sheet/token links | GM links/unlinks actors or places tokens from sheets; token menus open authorized linked sheets. Links survive scenes/restarts; deletion clears links. | New party tokens inherit control once. Existing HP/control remain separate; sheet reassignment does not reassign tokens. |
+| Visibility | Assigned living-token sight, walls/doors/windows, darkness, lights, darkvision and masked custom maps. | Shared fog planning is not concealment. No manual reveal mask, explored-map memory or blended light. |
+| Story tools | Private/shared text handouts, notes, quests/objectives and weighted random tables. | No folders/attachments, automatic traps/puzzles or loot distribution. |
+| Communication/dice | Character/account chat, whispers/emotes, public/GM/self-only dice and private macro definitions. | Simple formulas; sheet and macro rolls are public. |
+| Music/calling | Shared audio intent with listener opt-in/volume; direct WebRTC voice/video. | No TURN relay; internet-wide/real-device reliability is not established. |
+| Game references | Basic, D&D 2014/2024, Warhammer, Pathfinder, Fate and percentile profiles, check helpers, templates and book links. | Not a full system simulator or structured compendium. |
+| Ruler/FX | Line/square/circle/cone/beam measurement, snapping/free points, sharing and transient visual effects. | No automatic costs, damage, spells or programmable effects. |
+
+The written [Roll20 adventure-creation series](https://help.roll20.net/hc/en-us/articles/29257395844247-Creating-your-adventure-Overview), eleven chapters and resources informed the course. Astralis supports manual adventure preparation, not complete competitor parity. The Riverside story/worksheets are original; embedded-video playback was not verified.
+
+## Architecture and source map
+
+The authoritative path is `frontend → authenticated Go API → validated command → saved state/event → filtered live updates`. The server owns positions, dice, HP/damage, turns, permissions and durable changes. The client owns view transforms and temporary previews. Future AI narration must remain non-authoritative and respect information access.
+
+Passwords use salted PBKDF2-SHA256; seven-day bearer tokens survive restarts. Common account-specific projection filters snapshots, replay, live sync, listings and conflict/duplicate responses. GM objects, private content, self-only rolls and inaccessible sheet references are filtered before delivery; hidden-token link/placement history remains GM-only.
+
+JSON persistence uses a temporary file and rename under a process mutex. Save failures are logged rather than transactionally returned through every endpoint. Inline images/retained snapshots limit scale. Production rate limits, account lifecycle, role management, storage migration and observability remain open.
+
+| Location | Responsibility |
+| --- | --- |
+| `cmd/astralis/main.go`, `tools.go` | Server, persistence, HTTP API and core gameplay/tools. |
+| `live.go`, `ownership.go` | Live sessions, receipts/replay and actor authority. |
+| `table.go`, `sight.go`, `environment.go` | Workspace, common privacy projection, maps and visibility. |
+| `adventure.go`, `initiative.go`, `systems.go` | Sheets/links, quests/tables, tracker and game references. |
+| `frontend/app.js` | Routes, authentication/API handling and main UI. |
+| `tabletop.js`, `canvas.js`, `editor.js`, `systems.js` | Frontend workspace/canvas/specialist tools. |
+| `learning.js`, `adventure-guide.js` | Handbook, contextual help, course and original templates. |
+| `scripts/` | Contracts, disposable browser journeys and Vercel build. |
+| `frontend/rules/` | Open PDFs, attribution and source/checksum manifest. |
+| `Astralis-Game-Table/` | Historical prototype archive, excluded from Vercel output. |
+
+The accepted current design is map-focused: dark neutrals, Manrope, warm gold actions, cyan movement/system feedback and coral combat. Older light/isometric/cinematic concepts are historical. Preserve keyboard access, reduced-motion behavior and the usable 390px layout; do not reintroduce the superseded portrait/WebGL backdrop without a new request.
+
+## Verification
 
 ```powershell
 go test ./...
 go vet ./...
 node scripts/check-frontend.cjs
-```
-
-The frontend contract checks use API response fixtures. The Go journey test uses temporary storage and does not modify saved campaigns.
-
-The tabletop includes a character inspector, party and NPC roster, active turn display, blocked movement controls, a combat target panel, snapshot refresh, and an encounter log containing server resolved attack rolls, damage, movement, and discoveries. The RPG guide is available at `/#/guide`.
-
-The public page leads with an interactive tabletop preview rather than a portrait or WebGL backdrop. The campaign workspace includes search, name/date sorting, saved-session status, and campaign cards backed by the API. The game workspace includes a map tool rail, drag panning, zoom, fit to view, grid controls, an active-turn bar, and separate Actions, Characters, and Log panels. On mobile, the map remains scrollable and the inspector opens as a dismissible panel. Map view state survives character selection and game actions.
-
-The landing page also includes overlapping tabletop and character previews, accessible feature tabs for Maps/Characters/Combat, details of the included encounter, and learning resources. The Learn menu opens the RPG glossary, a seven-step first-session guide at `/#/getting-started`, or a three-step interactive preview walkthrough. The walkthrough uses the actual public preview controls; it does not create an account or alter a campaign. Character stats and starter-encounter counts describe the included encounter rather than published game-system support.
-
-Reference patterns were reviewed from public sites and official documentation: [Roll20](https://roll20.net/) for a product-led hero and campaign organization, [Alchemy](https://help.alchemyrpg.com/en/articles/9714185-gamemaster-orientation) for scene and party panels, [Foundry](https://foundryvtt.com/article/tutorial/) for the map tool rail and tabbed sidebar, and [Owlbear Rodeo](https://docs.owlbear.rodeo/docs/scenes/) for map-focused navigation and scene controls. Quest Portal's public page was also reviewed. Captures and source links are in `output/references/`; Owlbear's browser capture encountered a security check, so its official documentation supplied the reference instead. Astralis keeps its own assets, copy, and game API; no competitor feature claims, customer counts, or licensed game support were added.
-
-`node scripts/check-cinematic.cjs` runs isolated Playwright UI tests against the local server and writes desktop and 390px screenshots to `output/screenshots/`. It verifies campaign filtering/sorting, sidebar tabs, map pan/zoom/fit, preview controls, account and campaign flows, and encounter actions. It requires Playwright; `PLAYWRIGHT_MODULE` can point to an existing Playwright package. API responses in this browser test are fixtures, so it does not change saved campaign data. The separate Go tests verify the real API using temporary storage.
-
-## Try the tabletop tools
-
-Open <http://localhost:8080/#/login> and choose **Try a demo table**. No email or password is needed. Each entry creates a separate campaign with a GM account and an active encounter. Reloading the page or restarting the server preserves this sandbox while its browser sign-in remains valid. Signing out and choosing demo again creates a new sandbox.
-
-The map toolbar provides Select, Pan, Ruler, Line, Area, Block, Fog, Place, Ping, Grid, Fit and Sync. The ruler uses orthogonal grid-space distance. Line and Area use two cell clicks. Block toggles traversable terrain; movement checks routes, occupied cells and the remaining turn allowance. Fog is a shared planning overlay, not hidden player information or dynamic lighting. Place lets the GM move the token selected in Tools without spending its turn.
-
-The **Tools** tab contains:
-
-- Server-resolved dice rolls with a result card and saved event log.
-- Riverside/blank background switching and PNG/JPEG map upload (5 MB, 20 megapixel maximum), fitted to the 20 × 14 grid.
-- Persistent line/area annotations with undo, terrain edits and fog planning marks.
-- Token creation, name/HP editing, and placement for party members and hostile NPCs.
-- Shared session notes, chat, and campaign invitation codes.
-
-Players register separately and redeem an invitation in their campaign library. They can resume the shared table, chat, roll dice and ping. GM editing tools are restricted in both the UI and API. WebSockets deliver live session updates and member presence, with automatic reconnect and sequence replay. Five-second polling remains a fallback. Active form drafts are preserved. Local voice/video is now available through direct peer connections. A hosted lobby and published game-system compendiums remain unimplemented.
-
-Passwords use salted PBKDF2-SHA256; credentials and seven-day tokens persist in the local database. Existing accounts created by the earlier backend may need to be recreated if their password was never persisted. Session reads and commands now check campaign membership, and map/session creation checks ownership. Turn order cycles living party tokens, resets movement and attacks, and advances the round on wrap; hostile NPCs remain GM controlled.
-
-To validate the new features against a real backend with disposable data:
-
-```powershell
-go test ./...
-go vet ./...
 go build -o output/astralis-test.exe ./cmd/astralis
-node scripts/check-table-tools.cjs
 ```
 
-The browser journey launches its own server on port 18081, creates two isolated browser contexts, tests the tools and invitation/player flow, restarts that server to verify persistence, and removes its temporary database. It does not touch `data/astralis.json`. Set `PLAYWRIGHT_MODULE` to an installed Playwright package if needed. `ASTRALIS_DATA_FILE` overrides the normal database location for testing.
+Browser journeys require Playwright. Set `PLAYWRIGHT_MODULE` if an existing installation is not resolvable as `playwright`; verify the package path before using it. Journeys launch isolated browsers and temporary databases, not saved `data/astralis.json`.
 
-## Live multiplayer continuation — 12 November 2026
-
-The browser sends a unique `command_id` and `expected_state_version` with every action. Accepted command receipts survive restarts; retrying an accepted request returns the original result and a current snapshot without applying the action again. A stale action returns HTTP 409 with a current snapshot for review. A lost network response is retried once with the same ID. Older API clients may still omit both fields, but then receive neither safeguard.
-
-The live endpoint is `/api/v1/sessions/{id}/live?after={sequence}`. It authenticates the first WebSocket message (`{"token":"..."}`), enforces same-origin browser connections and campaign membership, sends `session.sync` with replay events/current snapshot, then broadcasts `session.updated` and `presence`. Tokens never appear in the URL. Presence counts unique connected accounts on that session; several tabs from one account count once. Reconnect applies the authoritative snapshot and retains the server event log. Incoming updates wait while a form field is focused. This transport currently targets one Go server process.
-
-After building `output/astralis-test.exe`, run `node scripts/check-live.cjs` with the same Playwright setup as above. It uses port 18082 and temporary storage to test two-member presence, live chat, draft preservation, a lost-response retry without rerolling dice, reconnect after a backend restart, route cleanup, mobile overflow, and polling fallback. Go tests also cover concurrent version conflicts, persisted deduplication, replay, membership, token revocation and origin checks. See [ASTRALIS_HANDOFF.md](ASTRALIS_HANDOFF.md) for remaining work and limits.
-
-## Character control
-
-In the table's **Characters** panel, the GM can select a party character, choose a campaign member under **Controlled by**, and save. Choose **Game master only** to clear an assignment. Invite players first; **Refresh players** loads members who joined after the panel was opened. Assignments are saved for that session and shared live.
-
-Players can move, attack, investigate, or end a turn only for their assigned party characters, subject to the existing turn/range/action rules. Other tokens remain available for inspection. The GM retains control of every party character and scene-editing tools; hostile NPCs remain GM-controlled. Existing saved tokens without assignments default to GM-only control. Server checks apply to direct API requests as well as the interface, including a retry made after control was revoked.
-
-`GET /api/v1/campaigns/{id}/members` returns campaign-scoped IDs, display names and roles for signed-in members. The GM submits `token.assign` through the normal session command endpoint with `token_id` and `controller_id` (empty to clear). The server validates the controller against campaign membership and publishes `token.assigned` with the updated snapshot. Global character-record CRUD/assignment and full character sheets remain future work.
-
-`node scripts/check-character-control.cjs` uses temporary storage on port 18083 and three isolated browser contexts to verify assignment, GM override, allowed player actions, other-player restrictions, reassignment/clearing, forged-request rejection, restart persistence and desktop/mobile controls. Build `output/astralis-test.exe` first and use the Playwright setup above.
-
-## Expanded tabletop workspace
-
-Open a saved/demo table and choose the new **Table** inspector tab. The existing Actions, Characters, Tools and Log panels remain available.
-
-| Section | Working features |
+| Script | Coverage / port |
 | --- | --- |
-| Scenes | Create a blank scene or duplicate the current one; rename, switch and delete archived scenes. The whole table follows the GM. Maps, tokens, terrain, fog marks, drawings, grid settings and initiative are saved per scene. |
-| Drawings | Line, rectangle, ellipse, cone, freehand, text and labeled pins; stroke color/width; map, token, GM-private and foreground layers; remove a drawing or undo the selected layer. |
-| Tokens | Rotation, 1–4 cell sizes, six status markers, movement locks, initiative modifiers, layers, duplication and deletion. Dragging a token submits an authorized move; GM dragging uses placement. Larger footprints affect collision checks. |
-| Art | Import PNG/JPEG images up to 2 MB into a ten-image library, apply artwork to a token or use it as a map. Unused library originals are GM-only. |
-| Lighting | Optional square-grid token line of sight through assigned living characters, with a radius of 1–30 cells. Blocked terrain stops rays, including closed diagonal corners. Custom map images are masked before player delivery; hidden tokens and events are filtered on the server. |
-| Turns | Server-resolved party initiative and start-in-order controls; pause/resume player movement. Hostile NPCs remain GM-controlled. |
-| Chat | Speak as your account or an authorized character; Enter sends and Shift+Enter adds a line. `/roll`, `/r`, `/gmroll`, `/gr`, `/w gm`, `/w "Player name"`, `/w member-id`, `/em` and `/me`. Dice syntax is `NdS±bonus`, with server limits. |
-| Journal | Create/edit/delete plain-text handouts, keep them GM-private or share them with players. |
-| Music | GM sets a shared HTTP(S) soundtrack; listeners explicitly enable playback, control their own volume, and start at the current track position. Source/browser playback restrictions still apply. |
-| Media | Explicitly join/leave a direct voice/video call, optionally include camera video, and mute/unmute the microphone. No device capture starts until Join and browser permission. Leaving/disconnecting stops capture. |
-| Macros | Save personal dice macros, run public server-resolved rolls and delete definitions. Other accounts, including the GM, cannot read personal definitions. |
-| Settings | Grid dimensions from 2–100 cells in either direction, ruler scale/units and orthogonal/straight-line/diagonal distance; share the last ruler measurement, zoom, fit and read-only generic player preview. Gameplay movement remains orthogonal pathfinding. |
+| `check-table-tools.cjs` | Tools, invitations, permissions and persistence; 18081. |
+| `check-live.cjs` | Live updates, retry, reconnect and polling; 18082. |
+| `check-character-control.cjs` | Assignment, forged actions and persistence; 18083. |
+| `check-table-workspace.cjs` | Scenes, privacy, art, sight and synthetic media; 18084. |
+| `check-adventure.cjs` | Sheets/resources, environment, quests, tables and invites; 18085. |
+| `check-canvas.cjs` | Gestures, freehand, pan/zoom and turns; 18086. |
+| `check-editor.cjs` | Context menus, tools, scenes and tracker; 18087. |
+| `check-systems.cjs` | Profiles, private dice, rulers/FX, books and lighting; 18088. |
+| `check-learning.cjs` | Handbook, tool targets, checklists, tour and roles; 18089. |
+| `check-adventure-course.cjs` | Course, templates, links, draft safety and persistence; 18090. |
+| `check-vercel.cjs` | Built preview/availability and no accidental API calls; 18091. |
+| `check-cinematic.cjs` | Landing/auth/campaign/map/mobile regression with API fixtures; defaults to localhost:8080. |
 
-Privacy is applied to snapshots, session listings, events, live sync/broadcast, stale-version responses and duplicate-command responses. Whisper content is delivered only to its sender and recipient; a GM does not automatically receive whispers between other players. GM-layer objects and private handouts are omitted from player data. If sight is enabled, players without an assigned living character see a dark map. The included Riverside artwork is also public as the landing-page sample; uploaded custom originals are not sent through the player snapshot when masked.
+Go tests/vet and all eleven gameplay/help journeys passed for the adventure-course continuation. Later Vercel build/production checks also passed. Earlier suites were not rerun solely for documentation consolidation. No successful race-detector run is claimed; CGO was disabled in the recorded environment. Keep screenshots and test output under ignored `output/`.
 
-The lighting model uses opaque grid-cell terrain, doors/windows, token sight, optional light-dependent visibility and darkvision. Explored-map memory, blended colored illumination, hex grids, published compendiums/modules, cards, advanced dice expressions and production hosting/storage remain future work. Direct calling requires localhost or HTTPS and a network that permits peer connections; internet-wide relay/TURN support is not configured. The continuation below describes the latest character, crop and random-table tools.
+## Content provenance
 
-The comparison used the supplied editor screenshot and Roll20's official [toolbar](https://help.roll20.net/hc/en-us/articles/360039674753-Toolbar-Overview), [layers](https://help.roll20.net/hc/en-us/articles/360039675053-Layers), [measurement](https://help.roll20.net/hc/en-us/articles/360039674913-Measure-Tool), [token](https://help.roll20.net/hc/en-us/articles/360039674573-Token-Features), and [chat](https://help.roll20.net/hc/en-us/articles/360039675093-Text-Chat) documentation. The authenticated editor was not available through a connected browser; no claim is made that its signed-in controls were inspected live.
+The unchanged publisher D&D SRD 5.1/5.2.1 PDFs are open references under CC BY 4.0. Legal pages, required attribution and checksums remain in `frontend/rules/ATTRIBUTION.txt` and `manifest.json`. Other rulebooks link to publisher or publisher-endorsed sources; commercial books/codexes are not bundled as supported compendiums. Icon attribution/license files remain in `frontend/assets/`.
 
-After rebuilding the test executable, run `node scripts/check-table-workspace.cjs` with the Playwright setup above. It starts port 18084 with temporary storage and verifies the expanded UI, private content, persistence and desktop/390px layouts. Audio and voice/video checks use synthetic audio and fake browser devices; they do not access personal microphones/cameras or establish internet-wide call reliability. Backend tests additionally verify privacy across all read paths, masked map pixels, wall occlusion, historical-event visibility, token footprints and session-scoped media signaling.
+Historical covers in `Astralis-Game-Table/assets/alchemy-covers/` were localized from the [Alchemy RPG catalog](https://alchemyrpg.com/) for prototype reference: `wilderfeast.webp` (Wilderfeast), `dungeons-and-dragons.webp` (Dungeons & Dragons), `call-of-cthulhu.webp` (Call of Cthulhu), `vaesen.webp` (Vaesen), `candela-obscura.webp` (Candela Obscura), and `vampire-the-masquerade.webp` (Vampire: The Masquerade). Confirm production distribution rights before publishing these assets. The archive remains excluded from Vercel deployment.
 
-## Character and GM toolkit — 14 November 2026
+## Next priorities
 
-The **Table** panel now includes **Sheets**, **Environment**, **Quests**, and **Tables** alongside existing journals and scene tools.
-
-- **Sheets:** GM-created system-neutral characters, assigned-player editing, private/shared visibility, attributes and background, inventory/spell/resource notes, plus structured entries with quantities and capacities. Prepared spells can spend uses; exhausted entries reject further use. Editing notes preserves tracked quantities. Sheet rolls use the existing server dice system and are public. Combat stats and spell effects remain manual.
-- **Environment:** cell-based open/closed, locked and secret doors; transparent windows that still block movement; optional scene darkness, colored light-source markers with wall-aware illumination, and per-token darkvision (0–30 cells). Players can toggle visible unlocked doors next to their assigned living character. Close actions reject occupied doorways. Lighting requires token sight in **Lighting**. Colors identify light sources; illumination is binary rather than physically blended.
-- **Map setup:** percentage crop bounds and quarter-turn rotation for imported custom maps. The server generates a new PNG, limited to 2048 pixels per side and 5 MB. Cropping replaces the current image; keep the original file to undo. Grid dimensions/scale remain under **Settings**. Doors and lights must fit when shrinking the grid.
-- **Quests:** descriptions, objective checklists written with `[ ]`/`[x]`, planned/active/completed/failed status, and GM-private/shared visibility. The GM manages quest progress; players read shared quests.
-- **Tables:** weighted random results, public/private tables and draws, draws with/without replacement, depletion checks and reset. The GM creates/edits/deletes and draws; players read shared tables/results.
-- **Invitations:** configurable expiry and join limits, owner-only listing/revocation in **Tools**. New defaults are seven days and ten joins; existing saved legacy codes retain compatibility. Redeeming never overwrites an existing member's role or consumes another use for existing membership. Revoking a code prevents future joins; it does not remove existing members.
-
-Sheets, quests and random tables belong to the saved session and survive scene switching. Environment data belongs to its scene. These features do not connect the older campaign-wide `/characters` records to scene spawning.
-
-Research used official [Foundry actors](https://foundryvtt.com/article/actors/), [rollable tables](https://foundryvtt.com/article/roll-tables/), [journals](https://foundryvtt.com/article/journal/), [Quest Portal sheets](https://www.questportal.com/features/character-sheets), [Owlbear fog](https://docs.owlbear.rodeo/docs/fog/), [Roll20 lighting/doors](https://roll20partners.zendesk.com/hc/en-us/articles/10269638920599-Setting-Up-Dynamic-Lighting), and [Alchemy GM tools](https://help.alchemyrpg.com/en/articles/9714185-gamemaster-orientation). This is an Astralis implementation of useful workflows; licensed content and full competitor parity are not included.
-
-Run `node scripts/check-adventure.cjs` after rebuilding `output/astralis-test.exe`. It uses temporary storage on port 18085 and isolated browser contexts to verify assigned sheets, tracked spell use, shared quests, weighted draws, doors/lights/darkvision, cropping, invitation revocation, restart persistence and desktop/mobile layouts. See the final handoff section for confirmed checks and remaining work.
-
-## Map interaction polish
-
-The tabletop now has a compact tool rail/inspector, an on-map drawing flyout with quick color/width/layer controls, smooth freehand strokes, live shape/token drag previews, shared-token movement transitions, and a floating party turn tracker. GM tracker controls edit initiative scores/order and roll/sort/start/advance turns without granting extra actions. Existing drawings and two-click tools remain compatible.
-
-Hold **Space** or the **middle mouse button** while dragging to pan. **Ctrl/Command + wheel** zooms around the pointer. **Y** toggles the turn tracker and **W** toggles the inspector when canvas focus is outside form controls. Ordinary wheel scrolling and the existing zoom/fit buttons remain available. Escape cancels unfinished drawing gestures. Reduced-motion settings disable token movement animation.
-
-`node scripts/check-canvas.cjs` tests these interactions against a temporary database on port 18086, including live previews, precise stored strokes, anchored zoom, tracker editing, shared movement animation, desktop/mobile layouts and restart persistence. Rebuild the test executable first. The latest verified development runtime is `output/astralis-polished.exe`; see the handoff for process/health evidence and reference-access limitations.
-
-## Contextual editor controls
-
-The rail now groups secondary tools under **More** and provides direct **Dice**, **Turns**, **Scenes** and **Layer** access. Double-click or right-click a token for its contextual panel. GMs can change HP (absolute or `-5`/`+5`), rotation, status markers, movement lock and token layer there; player panels preserve existing permissions. Quick dice rolls and scene switching use the saved API. Turn tracker entries support drag reordering as well as keyboard buttons. The Table panel's section selector provides direct navigation to all workspace tools.
-
-`node scripts/check-editor.cjs` verifies these workflows, player restrictions and restart persistence using disposable storage on port 18087. Build `output/astralis-test.exe` first. The latest verified local runtime is now **`output/astralis-editor.exe`**; reload the browser after restarting to load the new assets.
+Deploy/verify the persistent backend and connect Vercel. Further work includes structured system fields/explicit stat synchronization, grid alignment, open-license compendium imports, NPC/custom initiative, deeper rules automation, independent GM scene preparation and stronger persistence/auth foundations. Preserve unrelated edits and local saved campaigns.

@@ -25,4 +25,8 @@ venv/
 # Local JavaScript dependencies
 node_modules/
 
+# Keep README as the single published Markdown reference; retain local notes.
+*.md
+!/README.md
+
 .vercel
